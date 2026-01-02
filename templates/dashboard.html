@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GAC Dashboard</title>
+    <style>
+        :root {
+            --brand-blue: #003366;
+            --brand-yellow: #ffcc00;
+        }
+        body { font-family: sans-serif; margin: 0; display: flex; height: 100vh; }
+        .sidebar { width: 250px; background: var(--brand-blue); color: white; padding: 30px 20px; display: flex; flex-direction: column; }
+        .brand-header { font-size: 1.5em; font-weight: bold; margin-bottom: 40px; color: var(--brand-yellow); text-align: center; }
+        .sidebar p { margin: 10px 0; font-size: 0.95em; }
+        .content { flex: 1; padding: 50px; background: #f9f9f9; overflow-y: auto; }
+        h1 { color: var(--brand-blue); }
+        .report-card { background: white; padding: 25px; margin-bottom: 15px; border-left: 7px solid var(--brand-yellow); box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-radius: 4px; }
+        .report-card h3 { margin: 0 0 10px 0; }
+        .report-card a { color: var(--brand-blue); text-decoration: none; font-size: 1.2em; }
+        .report-card a:hover { text-decoration: underline; }
+        .tag { font-size: 0.85em; color: #555; background: #eee; padding: 4px 8px; border-radius: 12px; }
+        .admin-btn { display: block; text-align: center; background: var(--brand-yellow); color: var(--brand-blue); padding: 12px; text-decoration: none; border-radius: 4px; font-weight: bold; margin: 30px 0; transition: opacity 0.3s; }
+        .admin-btn:hover { opacity: 0.9; }
+        .logout-link { margin-top: auto; color: #ccc; text-decoration: none; text-align: center; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2); }
+        .logout-link:hover { color: white; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="brand-header">GAC Portal</div>
+        <p>Signed in as:<br><strong>{{ user.email }}</strong></p>
+        <p>Department Role:<br><strong style="color: var(--brand-yellow);">{{ user.role }}</strong></p>
+        
+        {% if user.role == 'GM' %}
+            <a href="/admin" class="admin-btn">Admin Panel</a>
+        {% endif %}
+        
+        <a href="/logout" class="logout-link">Log Out</a>
+    </div>
+    
+    <div class="content">
+        <h1>Your Available Reports</h1>
+        {% if reports %}
+            {% for report in reports %}
+            <div class="report-card">
+                <h3><a href="{{ report.link }}" target="_blank">{{ report.name }}</a></h3>
+                <span class="tag">{{ report.group_access }} Department</span>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No reports are currently assigned to your group.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

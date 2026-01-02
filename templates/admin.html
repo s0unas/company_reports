@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GAC Admin Panel</title>
+    <style>
+        :root { --brand-blue: #003366; --brand-yellow: #ffcc00; }
+        body { font-family: sans-serif; padding: 30px; background: #f4f4f4; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: var(--brand-blue); text-align: center; }
+        h2 { border-bottom: 3px solid var(--brand-yellow); padding-bottom: 10px; color: var(--brand-blue); margin-top: 40px; }
+        .form-row { display: flex; gap: 10px; margin-bottom: 15px; }
+        input, select { padding: 12px; flex: 1; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button.create-btn { padding: 12px 25px; background: var(--brand-blue); color: white; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; transition: background 0.3s; }
+        button.create-btn:hover { background: var(--brand-yellow); color: var(--brand-blue); }
+        .back-link { display: inline-block; margin-bottom: 20px; color: var(--brand-blue); text-decoration: none; font-weight: bold; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: var(--brand-blue); color: white; padding: 12px; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid #eee; }
+        tr:hover { background: #f9f9f9; }
+        .act-btn { text-decoration: none; font-weight: bold; margin-right: 10px; }
+        .edit { color: var(--brand-blue); }
+        .delete { color: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+        <h1>GM Admin Panel</h1>
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div style="background: #d4edda; padding: 15px; color: #155724; margin-bottom: 20px; border-radius: 4px;">
+                    {{ messages[0] }}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <h2>Create New User</h2>
+        <form method="POST">
+            <div class="form-row">
+                <input type="email" name="new_email" placeholder="Email" required>
+                <input type="text" name="new_password" placeholder="Password" required>
+                <select name="new_role">
+                    <option value="Logistics">Logistics</option>
+                    <option value="Sales">Sales</option>
+                    <option value="HR">HR</option>
+                    <option value="GM">GM</option>
+                </select>
+                <button type="submit" class="create-btn">Create User</button>
+            </div>
+        </form>
+
+        <h2>Add New Report</h2>
+        <form method="POST">
+            <div class="form-row">
+                <input type="text" name="report_name" placeholder="Report Title" required>
+                <input type="text" name="report_link" placeholder="Link URL" required>
+                <select name="report_group">
+                    <option value="Logistics">Logistics</option>
+                    <option value="Sales">Sales</option>
+                    <option value="HR">HR</option>
+                </select>
+                <button type="submit" class="create-btn">Add Report</button>
+            </div>
+        </form>
+
+        <h2>Manage Users</h2>
+        <table>
+            <thead><tr><th>Email</th><th>Role</th><th>Actions</th></tr></thead>
+            <tbody>
+                {% for u in users %}
+                <tr>
+                    <td>{{ u.email }}</td>
+                    <td>{{ u.role }}</td>
+                    <td>
+                        <a href="/edit_user/{{ u.id }}" class="act-btn edit">Edit</a>
+                        <a href="/delete_user/{{ u.id }}" class="act-btn delete" onclick="return confirm('Permanently delete {{ u.email }}?')">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h2>Manage Reports</h2>
+        <table>
+            <thead><tr><th>Report Name</th><th>Access Group</th><th>Actions</th></tr></thead>
+            <tbody>
+                {% for r in reports %}
+                <tr>
+                    <td><a href="{{ r.link }}" target="_blank" style="color: var(--brand-blue);">{{ r.name }}</a></td>
+                    <td>{{ r.group_access }}</td>
+                    <td>
+                        <a href="/edit_report/{{ r.id }}" class="act-btn edit">Edit</a>
+                        <a href="/delete_report/{{ r.id }}" class="act-btn delete" onclick="return confirm('Delete this report link?')">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
