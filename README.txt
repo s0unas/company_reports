@@ -12,6 +12,5 @@ Open your browser to: http://127.0.0.1:5000
 
 Demo Login Credentials:
 
-GM (Admin): boss@company.com / 123
+GM (Admin): sohairamin@gac.com / soko@1999
 
-Employee: logistics@company.com / 123
