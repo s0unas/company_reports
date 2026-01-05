@@ -74,25 +74,43 @@ def logout():
 @app.route('/admin', methods=['GET', 'POST'])
 @login_required
 def admin():
+    # 1. Security Check
     if current_user.role != 'GM':
         flash("Access Denied.")
         return redirect(url_for('dashboard'))
 
-    # Handle Adding New Items (Keep your existing POST logic here)
+    # 2. Handle Form Submissions (Create User or Report)
     if request.method == 'POST':
-        # ... (Keep your existing 'new_email' and 'report_name' logic here) ...
-        # If you deleted it, paste the logic from the previous step back in.
-        # For brevity, I assume the "Add" logic is still here.
+        
+        # --- CASE A: ADDING A NEW USER ---
         if 'new_email' in request.form:
-             # ... existing add user logic ...
-             pass # Remove 'pass' when you paste your code
-        elif 'report_name' in request.form:
-             # ... existing add report logic ...
-             pass 
+            email = request.form.get('new_email')
+            password = request.form.get('new_password')
+            role = request.form.get('new_role')
+            
+            if User.query.filter_by(email=email).first():
+                flash('Error: User with that email already exists.')
+            else:
+                new_user = User(email=email, password=password, role=role)
+                db.session.add(new_user)
+                db.session.commit()
+                flash(f'User {email} created successfully!')
 
-    # NEW: Fetch all data to display in the table
+        # --- CASE B: ADDING A NEW REPORT ---
+        elif 'report_name' in request.form:
+            name = request.form.get('report_name')
+            link = request.form.get('report_link')
+            group = request.form.get('report_group')
+            
+            new_report = Report(name=name, link=link, group_access=group)
+            db.session.add(new_report)
+            db.session.commit()
+            flash(f'Report "{name}" added to {group}.')
+
+    # 3. Load Data for the Tables
     all_users = User.query.all()
     all_reports = Report.query.all()
+    
     return render_template('admin.html', users=all_users, reports=all_reports)
 
 # --- DELETE ROUTES ---
@@ -156,27 +174,24 @@ def edit_report(id):
         
     return render_template('edit_report.html', report=report)
 
+# This creates the database and the master admin if none exist
 # --- SETUP SCRIPT ---
-# This creates the database and adds fake users/reports the first time you run it.
 def initialize_db():
     with app.app_context():
+        # Create the database tables if they don't exist
         db.create_all()
-        # Check if DB is empty, if so, seed data
+        
+        # Check if there is at least one user (to ensure you aren't locked out)
         if not User.query.first():
-            print("Creating dummy data...")
-            # Create Users
-            u1 = User(email='boss@company.com', password='123', role='GM')
-            u2 = User(email='logistics@company.com', password='123', role='Logistics')
-            u3 = User(email='sales@company.com', password='123', role='Sales')
+            print("Database is empty. Creating Master Admin...")
             
-            # Create Reports
-            r1 = Report(name='Global Revenue 2024', link='#', group_access='Sales')
-            r2 = Report(name='Shipping Manifests Dec', link='#', group_access='Logistics')
-            r3 = Report(name='Confidential HR Audit', link='#', group_access='HR')
+            # --- THIS IS THE ONLY USER HARDCODED IN SOURCE CODE ---
+            # You can change this email/password to your real one before sending
+            master_admin = User(email='sohairamin@gac.com', password='soko@1999', role='GM')
             
-            db.session.add_all([u1, u2, u3, r1, r2, r3])
+            db.session.add(master_admin)
             db.session.commit()
-            print("Database initialized.")
+            print("Master Admin created. You can now log in and create other users via the Admin Panel.")
 
 if __name__ == '__main__':
     initialize_db()
